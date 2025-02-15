@@ -8,10 +8,17 @@ data3 = pd.read_excel('Data/3.xlsx')
 data4 = pd.read_excel('Data/4.xlsx')
 data5 = pd.read_excel('Data/5.xlsx')
 
-data = [data1,data2,data3,data4,data5]
+data = [data1, data2, data3, data4, data5]
+
+# data1_f = pd.read_excel('Data/filtred_data/1.xlsx')
+# data2_f = pd.read_excel('Data/filtred_data/2.xlsx')
+# data3_f = pd.read_excel('Data/filtred_data/3.xlsx')
+# data4_f = pd.read_excel('Data/filtred_data/4.xlsx')
+# data5_f = pd.read_excel('Data/filtred_data/5.xlsx')
+# filtred_data = [data1_f, data2_f, data3_f, data4_f, data5_f]
 
 
-def moving_window_feature_extraction(data, window_size, step_size=1, fs=50):
+def moving_window_feature_extraction(data, window_size, step_size=1, fs=100):
 
     features_list = []
     total_samples = len(data)
@@ -36,11 +43,14 @@ def moving_window_feature_extraction(data, window_size, step_size=1, fs=50):
         smv_max = smv_values.max()
         smv_min = smv_values.min()
 
-        dominant_freq_ax, label_ax = compute_psd_label(window['ax'], fs)
-        dominant_freq_ay, label_ay = compute_psd_label(window['ay'], fs)
-        dominant_freq_az, label_az = compute_psd_label(window['az'], fs)
+        # dominant_freq_ax, label_ax = compute_psd_label(window['ax'], fs)
+        # dominant_freq_ay, label_ay = compute_psd_label(window['ay'], fs)
+        # dominant_freq_az, label_az = compute_psd_label(window['az'], fs)
 
-        label_global = 1 if (label_ax + label_ay + label_az) >= 2 else 0
+        label_ax = data['lx']
+        label_ay = data['ly']
+        label_az = data['lz']
+        label_global = 1 if any([label_ax, label_ay, label_az]) else 0 
 
 
         features = {
@@ -76,9 +86,9 @@ def moving_window_feature_extraction(data, window_size, step_size=1, fs=50):
             'mean_freq_power_ax': mean_freq_power_values[0],
             'mean_freq_power_ay': mean_freq_power_values[1],
             'mean_freq_power_az': mean_freq_power_values[2],
-            'dominant_freq_ax': dominant_freq_ax,
-            'dominant_freq_ay': dominant_freq_ay,
-            'dominant_freq_az': dominant_freq_az,
+            # 'dominant_freq_ax': dominant_freq_ax,
+            # 'dominant_freq_ay': dominant_freq_ay,
+            # 'dominant_freq_az': dominant_freq_az,
             'label_ax': label_ax,
             'label_ay': label_ay,
             'label_az': label_az,
@@ -95,13 +105,10 @@ def moving_window_feature_extraction(data, window_size, step_size=1, fs=50):
 def preprocess_data(data, window_size, step_size, fs):
     for i in range(len(data)):
         features_df = moving_window_feature_extraction(data[i], window_size, step_size, fs)
-        # save data to csv named data_i.csv in Data_Preprocessed folder
-        features_df.to_csv('Data_Preprocessed/data_'+str(i)+'.csv', index=False)
-
-
+        features_df.to_csv('Data_Preprocessed/data_'+str(i+1)+'_'+str(window_size)+'.csv', index=False)
 
 if __name__ == '__main__':
-    window_size = 128
-    step_size = 64
-    fs = 50
+    window_size = 50
+    step_size = 1
+    fs = 100
     preprocess_data(data, window_size, step_size, fs)
